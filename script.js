@@ -10,6 +10,7 @@ let food = {
 };
 let score = 0;
 
+
 document.addEventListener('keydown', changeDirection);
 
 function changeDirection(event) {
@@ -85,3 +86,71 @@ function draw() {
 
 // Call draw function every 100 ms
 const game = setInterval(draw, 100);
+//sound effects
+const eatSound = new Audio('/static/eat.mp3');
+const turnSound = new Audio('/static/turn.mp3');
+const gameOverSound = new Audio('/static/gameover.mp3');
+const startSound = new Audio('/static/start.mp3');
+let started = false;
+
+function gameLoop() {
+    fetch('/state')
+        .then(res => res.json())
+        .then(state => {
+            if (!started) {
+                startSound.play();
+                started = true;
+            }
+            draw(state);
+            if (!state.game_over) {
+                setTimeout(gameLoop, 200);
+            }
+        });
+}
+turnSound.play();
+document.addEventListener('keydown', (e) => {
+    const keyMap = {
+        ArrowLeft: 'LEFT',
+        ArrowUp: 'UP',
+        ArrowRight: 'RIGHT',
+        ArrowDown: 'DOWN'
+    };
+    const direction = keyMap[e.key];
+    if (direction) {
+        turnSound.play();
+        fetch('/move', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ direction })
+        }).then(res => res.json()).then(draw);
+    }
+});
+
+let lastScore = 0;
+
+function draw(state) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = 'green';
+    state.snake.forEach(([x, y]) => {
+        ctx.fillRect(x * box, y * box, box, box);
+    });
+
+    ctx.fillStyle = 'red';
+    const [fx, fy] = state.food;
+    ctx.fillRect(fx * box, fy * box, box, box);
+
+    if (state.score > lastScore) {
+        eatSound.play();
+        lastScore = state.score;
+    }
+
+    document.getElementById('score').innerText = 'Score: ' + state.score;
+
+    if (state.game_over) {
+        gameOverSound.play();
+        setTimeout(() => {
+            alert('Game Over! Your score: ' + state.score);
+        }, 200);
+    }
+}
