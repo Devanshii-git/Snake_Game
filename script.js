@@ -87,10 +87,10 @@ function draw() {
 // Call draw function every 100 ms
 const game = setInterval(draw, 100);
 //sound effects
-const eatSound = new Audio('/static/eat.mp3');
-const turnSound = new Audio('/static/turn.mp3');
-const gameOverSound = new Audio('/static/gameover.mp3');
-const startSound = new Audio('/static/start.mp3');
+const eatSound = new Audio('eat.mp3');
+const turnSound = new Audio('turn.mp3');
+const gameOverSound = new Audio('gameover.mp3');
+const startSound = new Audio('start.mp3');
 let started = false;
 
 function gameLoop() {
