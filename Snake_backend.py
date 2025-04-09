@@ -37,4 +37,40 @@ class SnakeGame:
         if new_direction != opposite_directions.get(self.direction):
             self.direction = new_direction
 
+    def update(self):
+        if self.game_over:
+            return
+
+        head_x, head_y = self.snake[0]
+        new_head = {
+            UP: (head_x, head_y - 1),
+            DOWN: (head_x, head_y + 1),
+            LEFT: (head_x - 1, head_y),
+            RIGHT: (head_x + 1, head_y),
+        }[self.direction]
+
+        if not (0 <= new_head[0] < self.width) or not (0 <= new_head[1] < self.height):
+            self.game_over = True
+            return
+
+        if new_head in self.snake:
+            self.game_over = True
+            return
+
+        self.snake.insert(0, new_head)
+
+        if new_head == self.food:
+            self.score += 1
+            self.generate_food()
+        else:
+            self.snake.pop()  # remove tail
+
+    def get_game_state(self):
+        return {
+            'snake': self.snake,
+            'food': self.food,
+            'score': self.score,
+            'game_over': self.game_over
+        }
+
    
