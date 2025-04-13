@@ -4,6 +4,13 @@ from backend import *
 from controls import *
 
 pygame.init()
+pygame.mixer.init()
+
+# Load sounds
+start_sound = pygame.mixer.Sound("assets/sounds/start.wav")
+eat_sound = pygame.mixer.Sound("assets/sounds/eat.wav")
+gameover_sound = pygame.mixer.Sound("assets/sounds/gameover.wav")
+turn_sound = pygame.mixer.Sound("assets/sounds/turn.wav")
 
 
 def game_over():
@@ -14,13 +21,22 @@ def game_over():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                RUN = True
-                show_tutorial_screen()  # 👈 Show tutorial after Game Over
-                gameloop()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    RUN = True
+                    show_tutorial_screen()  # Show tutorial after Game Over
+                    gameloop()
+                elif event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    quit()
 
 
 def gameloop():
+    pygame.mixer.music.load("assets/sounds/bgm.mp3")
+    pygame.mixer.music.play(-1)  # loop forever
+
+    start_sound.play()
+
     # Initial Setup
     screen_width, screen_height = 750, 650
     snake_x, snake_y = screen_width / 2, screen_height / 2
@@ -39,10 +55,14 @@ def gameloop():
             if event.type == pygame.QUIT:
                 exit_game = True
             vel_x, vel_y = handle_keys(event, vel_x, vel_y)
+            if event.type == pygame.KEYDOWN:
+                if event.key in [pygame.K_RIGHT, pygame.K_LEFT, pygame.K_UP, pygame.K_DOWN]:
+                    turn_sound.play()
 
         if check_food_collision(snake_x, snake_y, food_x, food_y):
             food_x, food_y = generate_food(screen_width, screen_height)
             snk_length += 20
+            eat_sound.play()
 
         snake_x, snake_y = update_snake_position(snake_x, snake_y, vel_x, vel_y)
         snk_list.append([snake_x, snake_y])
@@ -50,14 +70,17 @@ def gameloop():
             del snk_list[0]
 
         if is_collision_with_wall(snake_x, snake_y, screen_width, screen_height) or is_collision_with_self(snk_list):
+            pygame.mixer.music.stop()
+            gameover_sound.play()
             game_over()
 
         window.fill((0, 0, 0))
-        draw_snake(window, snk_list, snake_w,)
+        draw_snake(window, snk_list, snake_w)
         draw_food(window, food_x, food_y, snake_w, snake_h)
         pygame.display.update()
         clock.tick(fps)
 
 
+# Start the game
 show_tutorial_screen()
 gameloop()
