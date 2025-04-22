@@ -46,14 +46,22 @@ def draw_food(window, x, y, width, height):
     pygame.draw.circle(window, YELLOW, (center_x, center_y), radius)
 
 
-def show_game_over_screen():
-    window = create_window(800, 700, "Game Over!")
-    font = pygame.font.Font("freesansbold.ttf", 40)
-    text = font.render("Game Over! Press Enter to play Again", True, BLUE)
-    text_rect = text.get_rect(center=(400, 350))
-    window.fill(BLACK)
+def show_game_over_screen(score):
+    width, height = 750, 650
+    window = create_window(width, height, "Game Over")
+
+    font = pygame.font.SysFont(None, 50)
+    text = font.render("Game Over! Press Enter to play again", True, (255, 0, 0))
+    score_text = font.render(f"Your Score: {score}", True, (0, 0, 0))
+
+    text_rect = text.get_rect(center=(width // 2, height // 2 - 30))
+    score_rect = score_text.get_rect(center=(width // 2, height // 2 + 30))
+
+    window.fill((255, 255, 255))
     window.blit(text, text_rect)
+    window.blit(score_text, score_rect)
     pygame.display.update()
+
     return window
 
 
@@ -102,3 +110,8 @@ def show_tutorial_screen():
                 if exit_rect.collidepoint(pygame.mouse.get_pos()):
                     pygame.quit()
                     quit()
+
+def draw_score(window, score):
+    font = pygame.font.SysFont(None, 35)
+    score_text = font.render(f"Score: {score}", True, (0, 0, 0))
+    window.blit(score_text, (10, 10))
